@@ -1,95 +1,78 @@
 import axios from "axios";
 import { useState } from "react";
+import { Form, Input, Button, Typography, message } from "antd";
 
+const { Title } = Typography;
+
+const defaultUser = {
+  name: '',
+  age: '',
+  email: '',
+}
 const PostUser = () => {
-  
-    const [user, setUser] = useState({
-      name: '',
-      age: '',
-      email: '',
-    })
+  const [user, setUser] = useState(defaultUser);
 
-    const createUser = async () => {
-      await axios
-      .post("http://localhost:8000/api/form", 
-      user,
-      {
+  const createUser = async () => {
+    try {
+      const response = await axios.post("http://localhost:8000/api/form", user, {
         headers: {
           'Content-Type': 'application/x-www-form-urlencoded'
         }
-      })
-      .then((response) => {
-        setUser({      
-          name: '',
-          age: '',
-          email: '',
-        })
-        console.log(response)
-        return alert("User Created: " + `${JSON.stringify(response.data, null,4)}`);
-        })
-      .catch((err) => {
-        return alert(err);
       });
+      setUser(defaultUser);
+      message.success(`User Created: ${JSON.stringify(response.data, null, 4)}`);
+    } catch (err) {
+      message.error(err.message || "An error occurred");
     }
-
-    const onChangeForm = (e) => {
-      if (e.target.name === 'name') {
-        setUser({...user, name: e.target.value});
-      } else if (e.target.name === 'age') {
-        setUser({...user, age: e.target.value});
-      } else if (e.target.name === 'email') {
-        setUser({...user, email: e.target.value});
-      }
-  }
-
-    return (
-      <div >
-          <div>
-              <div>
-              <h1>Create User</h1>
-              <form>
-                  <div>
-                      <div>
-                          <label>Name</label>
-                          <input 
-                            type="text" 
-                            value={user.name}
-                            onChange={(e) => onChangeForm(e)} 
-                            name="name" 
-                            id="name" 
-                            placeholder="Name" 
-                          />
-                      </div>
-                      <div>
-                          <label>Age</label>
-                          <input 
-                            type="text" 
-                            value={user.age}
-                            onChange={(e) => onChangeForm(e)} 
-                            name="age" 
-                            id="age" 
-                            placeholder="Age" 
-                          />
-                      </div>
-                  </div>
-                  <div>
-                      <div>
-                          <label htmlFor="exampleInputEmail1">Email</label>
-                          <input 
-                            type="text" 
-                            value={user.email}
-                            onChange={(e) => onChangeForm(e)} 
-                            name="email" id="email" 
-                            placeholder="Email" 
-                          />
-                      </div>
-                  </div>
-                  <button type="button" onClick= {()=>createUser()}>Create</button>
-              </form>
-              </div>
-          </div>
-      </div>
-      );
   };
-  
-  export default PostUser;
+
+  const onChangeForm = (e) => {
+    const { name, value } = e.target;
+    setUser((prevUser) => ({
+      ...prevUser,
+      [name]: value,
+    }));
+  };
+
+  return (
+    <div style={{ padding: '20px' }}>
+      <Title level={2}>Create User</Title>
+      <Form layout="vertical" onFinish={createUser}>
+        <Form.Item label="Name">
+          <Input
+            type="text"
+            value={user.name}
+            onChange={onChangeForm}
+            name="name"
+            placeholder="Name"
+          />
+        </Form.Item>
+        <Form.Item label="Age">
+          <Input
+            type="text"
+            value={user.age}
+            onChange={onChangeForm}
+            name="age"
+            placeholder="Age"
+          />
+        </Form.Item>
+        <Form.Item label="Email">
+          <Input
+            type="text"
+            value={user.email}
+            onChange={onChangeForm}
+            name="email"
+            placeholder="Email"
+          />
+        </Form.Item>
+        <Form.Item>
+          <Button type="primary" htmlType="submit">
+            Create
+          </Button>
+        </Form.Item>
+      </Form>
+    </div>
+  );
+};
+
+export default PostUser;
